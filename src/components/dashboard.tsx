@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -308,7 +308,7 @@ export default function Dashboard() {
   };
 
 
-  const { totalSales, totalExpenses, creditDue } = React.useMemo(() => {
+  const { totalSales, totalExpenses, creditDue, netRevenue } = React.useMemo(() => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -317,17 +317,22 @@ export default function Dashboard() {
     const totalSales = todaysTransactions
       .filter(t => t.type === 'sale')
       .reduce((sum, t) => sum + t.amount, 0);
+      
+    const todaysCreditSales = todaysTransactions
+      .filter(t => t.type === 'sale' && t.isCredit)
+      .reduce((sum, t) => sum + t.amount, 0);
 
     const totalExpenses = todaysTransactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
       
     const creditDue = customers.reduce((sum, c) => sum + c.balance, 0);
+    
+    const netRevenue = totalSales - todaysCreditSales - totalExpenses;
 
-    return { totalSales, totalExpenses, creditDue };
+    return { totalSales, totalExpenses, creditDue, netRevenue };
   }, [transactions, customers]);
   
-  const netRevenue = totalSales - totalExpenses;
   const formatCurrency = (value: number) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
 
   if (isLoading) {
@@ -342,7 +347,7 @@ export default function Dashboard() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Includes cash and credit sales" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
-            <StatCard title="Net Revenue" value={formatCurrency(netRevenue)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Total Expenses" />
+            <StatCard title="Net Revenue" value={formatCurrency(netRevenue)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Total Cash Sales - Total Expenses" />
             <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
           </div>
 
@@ -421,5 +426,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    
