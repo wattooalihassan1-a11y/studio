@@ -314,15 +314,9 @@ export default function Dashboard() {
 
     const todaysTransactions = transactions.filter(t => t.timestamp >= todayStart.getTime());
 
-    const cashSalesAndRepayments = todaysTransactions
-      .filter(t => (t.type === 'sale' && !t.isCredit) || t.type === 'repayment')
+    const totalSales = todaysTransactions
+      .filter(t => t.type === 'sale')
       .reduce((sum, t) => sum + t.amount, 0);
-
-    const creditSales = todaysTransactions
-      .filter(t => t.type === 'sale' && t.isCredit)
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const totalSales = cashSalesAndRepayments - creditSales;
 
     const totalExpenses = todaysTransactions
       .filter(t => t.type === 'expense')
@@ -346,7 +340,7 @@ export default function Dashboard() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <StatCard title="Today's Sales (Cash)" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Cash/repayments minus credit sales" />
+            <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Includes cash and credit sales" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Net Revenue" value={formatCurrency(netRevenue)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Total Expenses" />
             <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
@@ -427,3 +421,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+    
