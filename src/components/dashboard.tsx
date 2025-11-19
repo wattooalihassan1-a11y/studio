@@ -238,6 +238,49 @@ export default function Dashboard() {
     }));
   };
 
+  const deleteTransaction = (transactionId: string) => {
+    const transaction = transactions.find(t => t.id === transactionId);
+    if (!transaction) return;
+
+    // Reverse the state changes caused by the transaction
+    switch (transaction.type) {
+      case 'sale':
+        if (transaction.fuelType && transaction.quantity) {
+          setFuelStock(prev => ({ ...prev, [transaction.fuelType!]: prev[transaction.fuelType!] + transaction.quantity! }));
+        }
+        if (transaction.isCredit && transaction.customerId) {
+          setCustomers(prev => prev.map(c => 
+            c.id === transaction.customerId ? { ...c, balance: c.balance - transaction.amount } : c
+          ));
+        }
+        break;
+      case 'repayment':
+        if (transaction.customerId) {
+          setCustomers(prev => prev.map(c =>
+            c.id === transaction.customerId ? { ...c, balance: c.balance + transaction.amount } : c
+          ));
+        }
+        break;
+      case 'stock':
+        if (transaction.fuelType && transaction.quantity) {
+          setFuelStock(prev => ({ ...prev, [transaction.fuelType!]: prev[transaction.fuelType!] - transaction.quantity! }));
+        }
+        break;
+      case 'expense':
+        // No other state to reverse, just remove the transaction
+        break;
+    }
+
+    setTransactions(prev => prev.filter(t => t.id !== transactionId));
+    toast({ title: "Transaction Deleted", description: "The transaction has been removed and its effects reversed." });
+  };
+  
+  const updateTransaction = (transactionId: string, newValues: Partial<Transaction>) => {
+     setTransactions(prev => prev.map(t => t.id === transactionId ? { ...t, ...newValues } : t));
+     toast({ title: "Success", description: "Transaction updated." });
+  };
+
+
   const { totalSales, totalExpenses, creditDue } = React.useMemo(() => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -297,13 +340,13 @@ export default function Dashboard() {
                               </FormControl><FormMessage /></FormItem>
                           )} />
                           <FormField control={saleForm.control} name="quantity" render={({ field }) => (
-                            <FormItem><FormLabel>Quantity (in Liters)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 10.5" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Quantity (in Liters)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 10.5" {...field} /></FormControl><FormMessage /></FormItem>
                           )} />
                           <FormField control={saleForm.control} name="isCredit" render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><div className="space-y-0.5"><FormLabel>Credit Sale (Udhar)</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>
                           )} />
                           {isCredit && <FormField control={saleForm.control} name="customerName" render={({ field }) => (
-                              <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="Enter customer name" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
+                              <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="Enter customer name" {...field} /></FormControl><FormMessage /></FormItem>
                           )} />}
                           <Button type="submit" className="w-full">Record Sale</Button>
                         </form>
@@ -317,10 +360,10 @@ export default function Dashboard() {
                         <Form {...expenseForm}>
                           <form onSubmit={expenseForm.handleSubmit(onExpenseSubmit)} className="space-y-4">
                             <FormField control={expenseForm.control} name="description" render={({ field }) => (
-                                <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <FormField control={expenseForm.control} name="amount" render={({ field }) => (
-                                <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <Button type="submit" className="w-full">Log Expense</Button>
                           </form>
@@ -334,7 +377,11 @@ export default function Dashboard() {
             </div>
             
             <div className="lg:col-span-2">
-                <RecentTransactions transactions={transactions} />
+                <RecentTransactions 
+                  transactions={transactions} 
+                  deleteTransaction={deleteTransaction}
+                  updateTransaction={updateTransaction}
+                  />
             </div>
           </div>
           
