@@ -36,6 +36,7 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
   const [repaymentCustomer, setRepaymentCustomer] = React.useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = React.useState<Customer | null>(null);
   const [deletingCustomer, setDeletingCustomer] = React.useState<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const { toast } = useToast();
 
   const repaymentForm = useForm<z.infer<typeof repaymentSchema>>({
@@ -54,7 +55,9 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
     }
   }, [editingCustomer, customerNameForm]);
 
-  const creditCustomers = customers.filter(c => c.balance > 0);
+  const creditCustomers = customers
+    .filter(c => c.balance > 0)
+    .filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   function onRepaymentSubmit(values: z.infer<typeof repaymentSchema>) {
     if (repaymentCustomer) {
@@ -96,6 +99,14 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
         <CardDescription>Track and manage outstanding payments from credit customers.</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-4">
+          <Input
+            placeholder="Search customers by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
         <ScrollArea className="h-96">
           <Table>
             <TableHeader>
@@ -141,7 +152,7 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
               ) : (
                 <TableRow>
                   <TableCell colSpan={3} className="h-24 text-center">
-                    No outstanding credit balances.
+                    No matching credit customers found.
                   </TableCell>
                 </TableRow>
               )}
