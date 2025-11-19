@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -16,6 +17,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Trash2, Edit, Info } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const repaymentSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive."),
@@ -98,6 +100,12 @@ export function CreditManagement({ customers, transactions, recordRepayment, upd
     ? transactions.filter(
       (t) => t.customerId === detailsCustomer.id && t.type === 'sale' && t.isCredit
     )
+    : [];
+
+  const customerRepayments = detailsCustomer
+    ? transactions.filter(
+        (t) => t.customerId === detailsCustomer.id && t.type === 'repayment'
+      )
     : [];
 
   return (
@@ -240,39 +248,75 @@ export function CreditManagement({ customers, transactions, recordRepayment, upd
                 <DialogHeader>
                     <DialogTitle>Credit Details for {detailsCustomer?.name}</DialogTitle>
                     <DialogDescription>
-                        Showing all credit sales for this customer.
+                        View credit sales and repayment history for this customer.
                     </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-96">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Fuel Type</TableHead>
-                                <TableHead className="text-right">Quantity (L)</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {customerCreditTransactions.length > 0 ? (
-                                customerCreditTransactions.map((tx) => (
-                                    <TableRow key={tx.id}>
-                                        <TableCell>{new Date(tx.timestamp).toLocaleDateString()}</TableCell>
-                                        <TableCell className="capitalize">{tx.fuelType}</TableCell>
-                                        <TableCell className="text-right font-mono">{tx.quantity?.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right font-mono">{formatCurrency(tx.amount)}</TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
+                <Tabs defaultValue="sales" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="sales">Credit Sales</TabsTrigger>
+                    <TabsTrigger value="repayments">Repayments</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="sales">
+                    <ScrollArea className="h-96">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center">
-                                        No credit transactions found for this customer.
-                                    </TableCell>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Fuel Type</TableHead>
+                                    <TableHead className="text-right">Quantity (L)</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </ScrollArea>
+                            </TableHeader>
+                            <TableBody>
+                                {customerCreditTransactions.length > 0 ? (
+                                    customerCreditTransactions.map((tx) => (
+                                        <TableRow key={tx.id}>
+                                            <TableCell>{new Date(tx.timestamp).toLocaleDateString()}</TableCell>
+                                            <TableCell className="capitalize">{tx.fuelType}</TableCell>
+                                            <TableCell className="text-right font-mono">{tx.quantity?.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right font-mono">{formatCurrency(tx.amount)}</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">
+                                            No credit transactions found for this customer.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
+                  </TabsContent>
+                  <TabsContent value="repayments">
+                    <ScrollArea className="h-96">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead className="text-right">Amount Paid</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {customerRepayments.length > 0 ? (
+                                    customerRepayments.map((tx) => (
+                                        <TableRow key={tx.id}>
+                                            <TableCell>{new Date(tx.timestamp).toLocaleDateString()}</TableCell>
+                                            <TableCell className="text-right font-mono">{formatCurrency(tx.amount)}</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={2} className="h-24 text-center">
+                                            No repayments found for this customer.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
             </DialogContent>
         </Dialog>
       </CardContent>
