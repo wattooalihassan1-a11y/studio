@@ -308,13 +308,13 @@ export default function Dashboard() {
   };
 
 
-  const { todaysRepayments, totalSales, totalExpenses, creditDue, netCash } = React.useMemo(() => {
+  const { totalSales, totalExpenses, creditDue, netCash, todaysRepayments } = React.useMemo(() => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const todaysTransactions = transactions.filter(t => t.timestamp >= todayStart.getTime());
 
-    const todaysTotalSales = todaysTransactions
+    const totalSales = todaysTransactions
       .filter(t => t.type === 'sale')
       .reduce((sum, t) => sum + t.amount, 0);
 
@@ -322,21 +322,19 @@ export default function Dashboard() {
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
       
-    const totalSales = todaysTotalSales - totalExpenses;
-      
     const todaysCreditSales = todaysTransactions
       .filter(t => t.type === 'sale' && t.isCredit)
       .reduce((sum, t) => sum + t.amount, 0);
-
+      
     const todaysRepayments = todaysTransactions
       .filter(t => t.type === 'repayment')
       .reduce((sum, t) => sum + t.amount, 0);
       
     const creditDue = customers.reduce((sum, c) => sum + c.balance, 0);
     
-    const netCash = todaysTotalSales - todaysCreditSales + todaysRepayments;
+    const netCash = totalSales - todaysCreditSales + todaysRepayments;
 
-    return { todaysRepayments, totalSales, totalExpenses, creditDue, netCash };
+    return { totalSales, totalExpenses, creditDue, netCash, todaysRepayments };
   }, [transactions, customers]);
   
   const formatCurrency = (value: number) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
@@ -351,7 +349,7 @@ export default function Dashboard() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Expenses" />
+            <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total cash & credit sales" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Today's Repayments" value={formatCurrency(todaysRepayments)} icon={<RefreshCcw className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales + Repayments" />
