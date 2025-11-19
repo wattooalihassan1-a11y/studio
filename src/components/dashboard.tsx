@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, TrendingDown, CreditCard, Users, Fuel, ShoppingCart } from "lucide-react";
+import { DollarSign, TrendingDown, CreditCard, Fuel, ShoppingCart } from "lucide-react";
 
 import { Header } from "./header";
 import { StatCard } from "./stat-card";
@@ -219,6 +219,25 @@ export default function Dashboard() {
     }
   };
 
+  const updateCustomerName = (customerId: string, newName: string) => {
+    setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, name: newName } : c));
+    setTransactions(prev => prev.map(t => t.customerId === customerId ? { ...t, customerName: newName } : t));
+  };
+  
+  const deleteCustomer = (customerId: string) => {
+    setCustomers(prev => prev.filter(c => c.id !== customerId));
+    // Optionally, decide what to do with transactions linked to the deleted customer.
+    // Here we're just removing the link, not the transaction itself.
+    setTransactions(prev => prev.map(t => {
+      if (t.customerId === customerId) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { customerId, customerName, ...rest } = t;
+        return rest as Transaction;
+      }
+      return t;
+    }));
+  };
+
   const { totalSales, totalExpenses, creditDue } = React.useMemo(() => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -278,13 +297,13 @@ export default function Dashboard() {
                               </FormControl><FormMessage /></FormItem>
                           )} />
                           <FormField control={saleForm.control} name="quantity" render={({ field }) => (
-                            <FormItem><FormLabel>Quantity (in Liters)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 10.5" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Quantity (in Liters)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 10.5" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
                           )} />
                           <FormField control={saleForm.control} name="isCredit" render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><div className="space-y-0.5"><FormLabel>Credit Sale (Udhar)</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>
                           )} />
                           {isCredit && <FormField control={saleForm.control} name="customerName" render={({ field }) => (
-                              <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="Enter customer name" {...field} /></FormControl><FormMessage /></FormItem>
+                              <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="Enter customer name" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
                           )} />}
                           <Button type="submit" className="w-full">Record Sale</Button>
                         </form>
@@ -298,10 +317,10 @@ export default function Dashboard() {
                         <Form {...expenseForm}>
                           <form onSubmit={expenseForm.handleSubmit(onExpenseSubmit)} className="space-y-4">
                             <FormField control={expenseForm.control} name="description" render={({ field }) => (
-                                <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <FormField control={expenseForm.control} name="amount" render={({ field }) => (
-                                <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <Button type="submit" className="w-full">Log Expense</Button>
                           </form>
@@ -320,7 +339,7 @@ export default function Dashboard() {
           </div>
           
           <div>
-            <CreditManagement customers={customers} recordRepayment={recordRepayment} />
+            <CreditManagement customers={customers} recordRepayment={recordRepayment} updateCustomerName={updateCustomerName} deleteCustomer={deleteCustomer} />
           </div>
 
         </div>
