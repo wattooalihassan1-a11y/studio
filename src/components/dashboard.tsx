@@ -308,29 +308,31 @@ export default function Dashboard() {
   };
 
 
-  const { totalSales, totalExpenses, creditDue, netRevenue } = React.useMemo(() => {
+  const { totalSales, totalExpenses, creditDue, netCash } = React.useMemo(() => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const todaysTransactions = transactions.filter(t => t.timestamp >= todayStart.getTime());
 
-    const totalSales = todaysTransactions
+    const todaysTotalSales = todaysTransactions
       .filter(t => t.type === 'sale')
-      .reduce((sum, t) => sum + t.amount, 0);
-      
-    const todaysCreditSales = todaysTransactions
-      .filter(t => t.type === 'sale' && t.isCredit)
       .reduce((sum, t) => sum + t.amount, 0);
 
     const totalExpenses = todaysTransactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
       
+    const totalSales = todaysTotalSales - totalExpenses;
+      
+    const todaysCreditSales = todaysTransactions
+      .filter(t => t.type === 'sale' && t.isCredit)
+      .reduce((sum, t) => sum + t.amount, 0);
+      
     const creditDue = customers.reduce((sum, c) => sum + c.balance, 0);
     
-    const netRevenue = totalSales - todaysCreditSales - totalExpenses;
+    const netCash = todaysTotalSales - todaysCreditSales - totalExpenses;
 
-    return { totalSales, totalExpenses, creditDue, netRevenue };
+    return { totalSales, totalExpenses, creditDue, netCash };
   }, [transactions, customers]);
   
   const formatCurrency = (value: number) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
@@ -345,9 +347,9 @@ export default function Dashboard() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Includes cash and credit sales" />
+            <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Expenses" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
-            <StatCard title="Net Revenue" value={formatCurrency(netRevenue)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Total Cash Sales - Total Expenses" />
+            <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales - Expenses" />
             <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
           </div>
 
@@ -378,7 +380,7 @@ export default function Dashboard() {
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><div className="space-y-0.5"><FormLabel>Credit Sale (Udhar)</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>
                           )} />
                           {isCredit && <FormField control={saleForm.control} name="customerName" render={({ field }) => (
-                              <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="Enter customer name" {...field} /></FormControl><FormMessage /></FormItem>
+                              <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="Enter customer name" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                           )} />}
                           <Button type="submit" className="w-full">Record Sale</Button>
                         </form>
@@ -392,7 +394,7 @@ export default function Dashboard() {
                         <Form {...expenseForm}>
                           <form onSubmit={expenseForm.handleSubmit(onExpenseSubmit)} className="space-y-4">
                             <FormField control={expenseForm.control} name="description" render={({ field }) => (
-                                <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <FormField control={expenseForm.control} name="amount" render={({ field }) => (
                                 <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
