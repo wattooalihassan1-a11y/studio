@@ -11,10 +11,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import type { Customer } from "@/lib/types";
+import type { Customer, Transaction } from "@/lib/types";
 import { ScrollArea } from "./ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash2, Edit } from "lucide-react";
+import { MoreHorizontal, Trash2, Edit, Info } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const repaymentSchema = z.object({
@@ -27,15 +27,17 @@ const customerNameSchema = z.object({
 
 interface CreditManagementProps {
   customers: Customer[];
+  transactions: Transaction[];
   recordRepayment: (customerId: string, amount: number) => void;
   updateCustomerName: (customerId: string, newName: string) => void;
   deleteCustomer: (customerId: string) => void;
 }
 
-export function CreditManagement({ customers, recordRepayment, updateCustomerName, deleteCustomer }: CreditManagementProps) {
+export function CreditManagement({ customers, transactions, recordRepayment, updateCustomerName, deleteCustomer }: CreditManagementProps) {
   const [repaymentCustomer, setRepaymentCustomer] = React.useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = React.useState<Customer | null>(null);
   const [deletingCustomer, setDeletingCustomer] = React.useState<Customer | null>(null);
+  const [detailsCustomer, setDetailsCustomer] = React.useState<Customer | null>(null);
   const [searchTerm, setSearchTerm] = React.useState("");
   const { toast } = useToast();
 
@@ -92,6 +94,12 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
 
+  const customerCreditTransactions = detailsCustomer
+    ? transactions.filter(
+      (t) => t.customerId === detailsCustomer.id && t.type === 'sale' && t.isCredit
+    )
+    : [];
+
   return (
     <Card>
       <CardHeader>
@@ -113,6 +121,7 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
               <TableRow>
                 <TableHead>Customer Name</TableHead>
                 <TableHead className="text-right">Outstanding Balance</TableHead>
+                <TableHead className="text-center">Details</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -122,6 +131,12 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
                   <TableRow key={customer.id}>
                     <TableCell className="font-medium">{customer.name}</TableCell>
                     <TableCell className="text-right font-mono">{formatCurrency(customer.balance)}</TableCell>
+                    <TableCell className="text-center">
+                        <Button variant="ghost" size="icon" onClick={() => setDetailsCustomer(customer)}>
+                            <Info className="h-4 w-4" />
+                            <span className="sr-only">View Details</span>
+                        </Button>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => setRepaymentCustomer(customer)}>
@@ -151,7 +166,7 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     No matching credit customers found.
                   </TableCell>
                 </TableRow>
@@ -219,6 +234,47 @@ export function CreditManagement({ customers, recordRepayment, updateCustomerNam
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        {/* Customer Details Dialog */}
+        <Dialog open={!!detailsCustomer} onOpenChange={(isOpen) => !isOpen && setDetailsCustomer(null)}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Credit Details for {detailsCustomer?.name}</DialogTitle>
+                    <DialogDescription>
+                        Showing all credit sales for this customer.
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-96">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Fuel Type</TableHead>
+                                <TableHead className="text-right">Quantity (L)</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {customerCreditTransactions.length > 0 ? (
+                                customerCreditTransactions.map((tx) => (
+                                    <TableRow key={tx.id}>
+                                        <TableCell>{new Date(tx.timestamp).toLocaleDateString()}</TableCell>
+                                        <TableCell className="capitalize">{tx.fuelType}</TableCell>
+                                        <TableCell className="text-right font-mono">{tx.quantity?.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right font-mono">{formatCurrency(tx.amount)}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-24 text-center">
+                                        No credit transactions found for this customer.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

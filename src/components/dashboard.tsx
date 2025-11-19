@@ -423,7 +423,13 @@ export default function Dashboard() {
           </div>
           
           <div>
-            <CreditManagement customers={customers} recordRepayment={recordRepayment} updateCustomerName={updateCustomerName} deleteCustomer={deleteCustomer} />
+            <CreditManagement 
+              customers={customers} 
+              recordRepayment={recordRepayment} 
+              updateCustomerName={updateCustomerName} 
+              deleteCustomer={deleteCustomer}
+              transactions={transactions}
+            />
           </div>
 
         </div>
