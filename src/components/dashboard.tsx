@@ -330,7 +330,7 @@ export default function Dashboard() {
       
     const creditDue = customers.reduce((sum, c) => sum + c.balance, 0);
     
-    const netCash = todaysTotalSales - todaysCreditSales - totalExpenses;
+    const netCash = todaysTotalSales - todaysCreditSales;
 
     return { totalSales, totalExpenses, creditDue, netCash };
   }, [transactions, customers]);
