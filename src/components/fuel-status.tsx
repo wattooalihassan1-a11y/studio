@@ -66,7 +66,7 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
   }
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(value);
+    new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
 
   const getProgressColor = (value: number) => {
     if (value < 20) return "bg-red-500";

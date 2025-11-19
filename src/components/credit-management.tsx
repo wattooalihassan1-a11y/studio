@@ -46,7 +46,7 @@ export function CreditManagement({ customers, recordRepayment }: CreditManagemen
   }
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(value);
+    new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
 
   return (
     <Card>

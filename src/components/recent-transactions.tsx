@@ -13,7 +13,7 @@ interface RecentTransactionsProps {
 
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(value);
+    new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
 
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {

@@ -170,7 +170,7 @@ export default function Dashboard() {
 
   const onExpenseSubmit = (values: z.infer<typeof expenseSchema>) => {
     addTransaction({ type: 'expense', amount: values.amount, description: values.description, isCredit: false });
-    toast({ title: "Expense Logged", description: `${values.description} for ₹${values.amount} has been logged.` });
+    toast({ title: "Expense Logged", description: `${values.description} for PKR ${values.amount} has been logged.` });
     expenseForm.reset();
     setExpenseModalOpen(false);
   };
@@ -226,7 +226,7 @@ export default function Dashboard() {
   }, [transactions, customers]);
   
   const netRevenue = totalSales - totalExpenses;
-  const formatCurrency = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(value);
+  const formatCurrency = (value: number) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
 
   if (isLoading) {
     return <DashboardSkeleton />;
