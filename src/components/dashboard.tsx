@@ -111,8 +111,21 @@ export default function Dashboard() {
   const [expenseModalOpen, setExpenseModalOpen] = React.useState(false);
   const { toast } = useToast();
 
-  const saleForm = useForm<z.infer<typeof saleSchema>>({ resolver: zodResolver(saleSchema), defaultValues: { isCredit: false } });
-  const expenseForm = useForm<z.infer<typeof expenseSchema>>({ resolver: zodResolver(expenseSchema) });
+  const saleForm = useForm<z.infer<typeof saleSchema>>({ 
+    resolver: zodResolver(saleSchema), 
+    defaultValues: { 
+      isCredit: false,
+      quantity: 0,
+      customerName: "",
+    } 
+  });
+  const expenseForm = useForm<z.infer<typeof expenseSchema>>({ 
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      description: "",
+      amount: 0,
+    }
+  });
 
   const isCredit = saleForm.watch("isCredit");
 

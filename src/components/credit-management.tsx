@@ -28,6 +28,9 @@ export function CreditManagement({ customers, recordRepayment }: CreditManagemen
   const { toast } = useToast();
   const form = useForm<z.infer<typeof repaymentSchema>>({
     resolver: zodResolver(repaymentSchema),
+    defaultValues: {
+      amount: 0,
+    }
   });
 
   const creditCustomers = customers.filter(c => c.balance > 0);
