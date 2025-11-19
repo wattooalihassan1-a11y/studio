@@ -104,7 +104,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>("transactions", []);
   const [customers, setCustomers] = useLocalStorage<Customer[]>("customers", []);
-  const [fuelStock, setFuelStock] = useLocalStorage<{ petrol: number, diesel: number }>("fuelStock", { petrol: 10000, diesel: 15000 });
+  const [fuelStock, setFuelStock] = useLocalStorage<{ petrol: number, diesel: number }>("fuelStock", { petrol: 0, diesel: 0 });
   const [fuelPrices, setFuelPrices] = useLocalStorage<{ petrol: number, diesel: number }>("fuelPrices", { petrol: 102.5, diesel: 95.8 });
   
   const [saleModalOpen, setSaleModalOpen] = React.useState(false);
