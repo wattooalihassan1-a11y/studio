@@ -46,6 +46,9 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
 
   const stockForm = useForm<z.infer<typeof stockSchema>>({
     resolver: zodResolver(stockSchema),
+    defaultValues: {
+      quantity: 0,
+    },
   });
 
   React.useEffect(() => {
@@ -61,7 +64,7 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
   function onStockSubmit(values: z.infer<typeof stockSchema>) {
     addStock(values.fuelType, values.quantity);
     toast({ title: "Success", description: "New stock has been added." });
-    stockForm.reset();
+    stockForm.reset({ quantity: 0, fuelType: undefined });
     setStockModalOpen(false);
   }
 
@@ -156,14 +159,14 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
                   <FormField control={priceForm.control} name="petrol" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Petrol Price (/liter)</FormLabel>
-                      <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                      <FormControl><Input type="number" step="0.01" {...field} value={field.value ?? ""} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <FormField control={priceForm.control} name="diesel" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Diesel Price (/liter)</FormLabel>
-                      <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                      <FormControl><Input type="number" step="0.01" {...field} value={field.value ?? ""} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
