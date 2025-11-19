@@ -349,7 +349,7 @@ export default function Dashboard() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Expenses" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
-            <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales - Expenses" />
+            <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales" />
             <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
           </div>
 
