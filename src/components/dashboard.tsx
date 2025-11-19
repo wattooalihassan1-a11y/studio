@@ -200,6 +200,32 @@ export default function Dashboard() {
     });
   };
 
+  const updateStock = (newStock: { petrol: number; diesel: number }) => {
+    const oldStock = fuelStock;
+    setFuelStock(newStock);
+
+    if (newStock.petrol !== oldStock.petrol) {
+      addTransaction({
+        type: 'stock',
+        fuelType: 'petrol',
+        quantity: newStock.petrol - oldStock.petrol,
+        amount: 0,
+        description: `Stock adjusted to ${newStock.petrol}L`,
+        isCredit: false,
+      });
+    }
+    if (newStock.diesel !== oldStock.diesel) {
+        addTransaction({
+        type: 'stock',
+        fuelType: 'diesel',
+        quantity: newStock.diesel - oldStock.diesel,
+        amount: 0,
+        description: `Stock adjusted to ${newStock.diesel}L`,
+        isCredit: false,
+      });
+    }
+  };
+
   const updatePrices = (prices: { petrol: number, diesel: number }) => {
     setFuelPrices(prices);
   };
@@ -263,6 +289,7 @@ export default function Dashboard() {
         break;
       case 'stock':
         if (transaction.fuelType && transaction.quantity) {
+          // Reverting stock 'addition' or 'adjustment'
           setFuelStock(prev => ({ ...prev, [transaction.fuelType!]: prev[transaction.fuelType!] - transaction.quantity! }));
         }
         break;
@@ -373,7 +400,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <FuelStatus stock={fuelStock} prices={fuelPrices} addStock={addStock} updatePrices={updatePrices} />
+              <FuelStatus stock={fuelStock} prices={fuelPrices} addStock={addStock} updatePrices={updatePrices} updateStock={updateStock}/>
             </div>
             
             <div className="lg:col-span-2">

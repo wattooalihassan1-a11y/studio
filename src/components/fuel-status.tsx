@@ -27,16 +27,23 @@ const stockSchema = z.object({
   quantity: z.coerce.number().min(1, "Quantity must be at least 1 liter."),
 });
 
+const editStockSchema = z.object({
+  petrol: z.coerce.number().min(0, "Stock cannot be negative."),
+  diesel: z.coerce.number().min(0, "Stock cannot be negative."),
+});
+
 interface FuelStatusProps {
   stock: { petrol: number; diesel: number };
   prices: { petrol: number; diesel: number };
   addStock: (fuelType: FuelType, quantity: number) => void;
   updatePrices: (prices: { petrol: number; diesel: number }) => void;
+  updateStock: (newStock: { petrol: number; diesel: number }) => void;
 }
 
-export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatusProps) {
+export function FuelStatus({ stock, prices, addStock, updatePrices, updateStock }: FuelStatusProps) {
   const [priceModalOpen, setPriceModalOpen] = React.useState(false);
   const [stockModalOpen, setStockModalOpen] = React.useState(false);
+  const [editStockModalOpen, setEditStockModalOpen] = React.useState(false);
   const { toast } = useToast();
 
   const priceForm = useForm<z.infer<typeof priceSchema>>({
@@ -50,10 +57,20 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
       quantity: 0,
     },
   });
+  
+  const editStockForm = useForm<z.infer<typeof editStockSchema>>({
+    resolver: zodResolver(editStockSchema),
+    defaultValues: stock,
+  });
 
   React.useEffect(() => {
     priceForm.reset(prices);
   }, [prices, priceForm]);
+  
+  React.useEffect(() => {
+    editStockForm.reset(stock);
+  }, [stock, editStockForm]);
+
 
   function onPriceSubmit(values: z.infer<typeof priceSchema>) {
     updatePrices(values);
@@ -67,6 +84,13 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
     stockForm.reset({ quantity: 0, fuelType: undefined });
     setStockModalOpen(false);
   }
+
+  function onEditStockSubmit(values: z.infer<typeof editStockSchema>) {
+    updateStock(values);
+    toast({ title: "Success", description: "Stock levels have been updated." });
+    setEditStockModalOpen(false);
+  }
+
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
@@ -150,7 +174,7 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
 
           <Dialog open={priceModalOpen} onOpenChange={setPriceModalOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline"><Edit className="mr-2 h-4 w-4" /> Update Prices</Button>
+              <Button variant="outline"><Tag className="mr-2 h-4 w-4" /> Update Prices</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Update Fuel Prices</DialogTitle></DialogHeader>
@@ -159,14 +183,14 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
                   <FormField control={priceForm.control} name="petrol" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Petrol Price (/liter)</FormLabel>
-                      <FormControl><Input type="number" step="0.01" {...field} value={field.value ?? ""} /></FormControl>
+                      <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <FormField control={priceForm.control} name="diesel" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Diesel Price (/liter)</FormLabel>
-                      <FormControl><Input type="number" step="0.01" {...field} value={field.value ?? ""} /></FormControl>
+                      <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -175,6 +199,35 @@ export function FuelStatus({ stock, prices, addStock, updatePrices }: FuelStatus
               </Form>
             </DialogContent>
           </Dialog>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          <Dialog open={editStockModalOpen} onOpenChange={setEditStockModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline"><Edit className="mr-2 h-4 w-4" /> Edit Stock</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Edit Stock Levels</DialogTitle></DialogHeader>
+                <Form {...editStockForm}>
+                  <form onSubmit={editStockForm.handleSubmit(onEditStockSubmit)} className="space-y-4">
+                    <FormField control={editStockForm.control} name="petrol" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Petrol Stock (in Liters)</FormLabel>
+                        <FormControl><Input type="number" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={editStockForm.control} name="diesel" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Diesel Stock (in Liters)</FormLabel>
+                        <FormControl><Input type="number" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <Button type="submit" className="w-full">Save Stock Levels</Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
         </div>
       </CardContent>
     </Card>
