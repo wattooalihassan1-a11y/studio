@@ -314,9 +314,15 @@ export default function Dashboard() {
 
     const todaysTransactions = transactions.filter(t => t.timestamp >= todayStart.getTime());
 
-    const totalSales = todaysTransactions
+    const cashSalesAndRepayments = todaysTransactions
       .filter(t => (t.type === 'sale' && !t.isCredit) || t.type === 'repayment')
       .reduce((sum, t) => sum + t.amount, 0);
+
+    const creditSales = todaysTransactions
+      .filter(t => t.type === 'sale' && t.isCredit)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalSales = cashSalesAndRepayments - creditSales;
 
     const totalExpenses = todaysTransactions
       .filter(t => t.type === 'expense')
@@ -340,7 +346,7 @@ export default function Dashboard() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <StatCard title="Today's Sales (Cash)" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Includes cash sales and repayments" />
+            <StatCard title="Today's Sales (Cash)" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Cash/repayments minus credit sales" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Net Revenue" value={formatCurrency(netRevenue)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Total Expenses" />
             <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
@@ -367,7 +373,7 @@ export default function Dashboard() {
                               </FormControl><FormMessage /></FormItem>
                           )} />
                           <FormField control={saleForm.control} name="quantity" render={({ field }) => (
-                            <FormItem><FormLabel>Quantity (in Liters)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 10.5" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Quantity (in Liters)</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 10.5" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                           )} />
                           <FormField control={saleForm.control} name="isCredit" render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><div className="space-y-0.5"><FormLabel>Credit Sale (Udhar)</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>
@@ -390,7 +396,7 @@ export default function Dashboard() {
                                 <FormItem><FormLabel>Description</FormLabel><FormControl><Input placeholder="e.g., Staff salary" {...field} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <FormField control={expenseForm.control} name="amount" render={({ field }) => (
-                                <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 500" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <Button type="submit" className="w-full">Log Expense</Button>
                           </form>
