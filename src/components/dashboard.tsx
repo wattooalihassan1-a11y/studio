@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, TrendingDown, CreditCard, Fuel, ShoppingCart } from "lucide-react";
+import { DollarSign, TrendingDown, CreditCard, Fuel, ShoppingCart, RefreshCcw } from "lucide-react";
 
 import { Header } from "./header";
 import { StatCard } from "./stat-card";
@@ -76,8 +76,8 @@ const DashboardSkeleton = () => (
     <Header />
     <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
       <div className="space-y-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {[...Array(5)].map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Skeleton className="h-4 w-24" />
@@ -308,7 +308,7 @@ export default function Dashboard() {
   };
 
 
-  const { totalSales, totalExpenses, creditDue, netCash } = React.useMemo(() => {
+  const { todaysRepayments, totalSales, totalExpenses, creditDue, netCash } = React.useMemo(() => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -336,7 +336,7 @@ export default function Dashboard() {
     
     const netCash = todaysTotalSales - todaysCreditSales + todaysRepayments;
 
-    return { totalSales, totalExpenses, creditDue, netCash };
+    return { todaysRepayments, totalSales, totalExpenses, creditDue, netCash };
   }, [transactions, customers]);
   
   const formatCurrency = (value: number) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }).format(value);
@@ -350,9 +350,10 @@ export default function Dashboard() {
       <Header />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total Sales - Expenses" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
+            <StatCard title="Today's Repayments" value={formatCurrency(todaysRepayments)} icon={<RefreshCcw className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales + Repayments" />
             <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
           </div>
