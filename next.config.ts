@@ -35,6 +35,23 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Makes sure that webpack doesn't try to resolve server-only modules on the client
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'firebase-admin': false,
+      };
+    }
+    return config;
+  },
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        'firebase-admin': '/node_modules/next/dist/build/webpack/alias.js',
+      },
+    },
+  },
 };
 
 module.exports = withPWA(nextConfig);
