@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -348,12 +349,12 @@ export default function Dashboard() {
       <Header />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
-          <div className="grid gap-4 md:grid-cols-2 grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total cash & credit sales" />
             <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales + Repayments" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Today's Repayments" value={formatCurrency(todaysRepayments)} icon={<RefreshCcw className="h-4 w-4 text-muted-foreground" />} />
-             <div className="col-span-2">
+             <div className="md:col-span-2 lg:col-span-3">
               <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
             </div>
           </div>
