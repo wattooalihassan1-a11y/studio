@@ -322,8 +322,8 @@ export default function Dashboard() {
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
       
-    const todaysCreditSales = todaysTransactions
-      .filter(t => t.type === 'sale' && t.isCredit)
+    const todaysCashSales = todaysTransactions
+      .filter(t => t.type === 'sale' && !t.isCredit)
       .reduce((sum, t) => sum + t.amount, 0);
       
     const todaysRepayments = todaysTransactions
@@ -332,7 +332,7 @@ export default function Dashboard() {
       
     const creditDue = customers.reduce((sum, c) => sum + c.balance, 0);
     
-    const netCash = totalSales - todaysCreditSales + todaysRepayments;
+    const netCash = todaysCashSales + todaysRepayments;
 
     return { totalSales, totalExpenses, creditDue, netCash, todaysRepayments };
   }, [transactions, customers]);
@@ -344,16 +344,18 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-secondary/20">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 container mx-auto">
         <div className="space-y-8">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-2 grid-cols-2">
             <StatCard title="Today's Sales" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Total cash & credit sales" />
+            <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales + Repayments" />
             <StatCard title="Today's Expenses" value={formatCurrency(totalExpenses)} icon={<TrendingDown className="h-4 w-4 text-muted-foreground" />} />
             <StatCard title="Today's Repayments" value={formatCurrency(todaysRepayments)} icon={<RefreshCcw className="h-4 w-4 text-muted-foreground" />} />
-            <StatCard title="Net Cash" value={formatCurrency(netCash)} icon={<Fuel className="h-4 w-4 text-muted-foreground" />} description="Cash Sales + Repayments" />
-            <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
+             <div className="col-span-2">
+              <StatCard title="Total Credit Due" value={formatCurrency(creditDue)} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} description="Total outstanding from all customers" />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
