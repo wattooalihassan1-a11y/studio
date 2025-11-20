@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: 'FuelTrack Pro',
   description: 'A complete petrol pump management system to manage and track all fuel operations digitally.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

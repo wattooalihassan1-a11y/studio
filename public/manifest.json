@@ -1,0 +1,21 @@
+{
+  "name": "FuelTrack Pro",
+  "short_name": "FuelTrack",
+  "description": "A complete petrol pump management system to manage and track all fuel operations digitally.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#18181b",
+  "theme_color": "#6d28d9",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
